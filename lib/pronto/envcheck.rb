@@ -2,7 +2,10 @@ require 'pronto'
 
 module Pronto
   class Envcheck < Runner
-    CHECKS = [/ENV\[('|"):?(\w+?)('|")\]/].freeze
+    CHECKS = [
+      /ENV\[('|"):?(?<variable>\w+?)('|")\]/,
+      /ENV.fetch\(('|")(?<variable>[A-Z_0-9]+?)('|")\)/
+    ].freeze
 
     def run
       return [] unless @patches
@@ -51,7 +54,7 @@ module Pronto
       CHECKS.any? do |check|
         match = check.match(line)
 
-        (match && !(readme.include? match[2] ))
+        match && !readme.include?(match[:variable])
       end
     end
 
